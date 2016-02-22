@@ -31,6 +31,7 @@ set number
 set backspace=2
 let mapleader = ","
 filetype plugin indent on
+set clipboard=unnamed
 
 " Deoplete
 let g:deoplete#enable_at_startup = 1
