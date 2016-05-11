@@ -12,10 +12,11 @@ Plug 'neovimhaskell/haskell-vim'
 Plug 'Shougo/deoplete.nvim'
 Plug 'eagletmt/neco-ghc'
 Plug 'kien/rainbow_parentheses.vim'
-Plug 'fsharp/vim-fsharp'
 Plug 'scrooloose/syntastic'
 Plug 'ervandew/supertab'
 Plug 'ternjs/tern_for_vim', { 'do': 'npm install' }
+Plug 'justmao945/vim-clang'
+Plug 'zchee/deoplete-jedi'
 
 call plug#end()
 
@@ -42,7 +43,10 @@ endif
 let g:haskellmode_completion_ghc = 0
 autocmd InsertLeave,CompleteDone * if pumvisible() == 0 | pclose | endif
 autocmd FileType haskell setlocal omnifunc=necoghc#omnifunc
+
 autocmd FileType javascript setlocal omnifunc=tern#Complete
+
+let g:clang_auto = 0
 
 " Tabs
 set tabstop=4
