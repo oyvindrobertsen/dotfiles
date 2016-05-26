@@ -5,7 +5,7 @@
 ;; Show line numbers
 (global-linum-mode)
 
-;; You can uncomment this to remove the graphical toolbar at the top. After
+    ;; You can uncomment this to remove the graphical toolbar at the top. After
 ;; awhile, you won't need the toolbar.
 ;; (when (fboundp 'tool-bar-mode)
 ;;   (tool-bar-mode -1))
@@ -27,7 +27,7 @@
 
 (set-face-attribute 'default nil
                     :family "Source Code Pro"
-                    :height 140
+                    :height 110
                     :weight 'normal
                     :width 'normal)
 
