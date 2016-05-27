@@ -71,6 +71,7 @@
     ;; What am I, a savage?
     evil
     evil-leader
+    evil-magit
 
     ;; PHP -.-
     php-mode
@@ -97,6 +98,9 @@
     org-bullets
     flycheck
     editorconfig
+    exec-path-from-shell
+    spaceline
+    diminish
     
     gruvbox-theme
 ))
