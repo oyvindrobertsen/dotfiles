@@ -165,6 +165,7 @@ bindsym Mod1+Shift+e exec --no-startup-id  "i3-nagbar -t warning -m 'You pressed
 
 ### Exec ###
 
+exec --no-startup-id VBoxClient-all
 exec --no-startup-id sh ~/.fehbg
 
 ### Bar ###
