@@ -94,6 +94,7 @@
     web-mode
     fireplace
     evil-org
+    evil-mu4e
     evil-leader
     org-bullets
     flycheck
@@ -101,6 +102,7 @@
     exec-path-from-shell
     spaceline
     diminish
+    mu4e-alert
     
     gruvbox-theme
 ))
@@ -169,6 +171,10 @@
 (load "setup-js.el")
 (load "setup-php.el")
 (load "setup-org.el")
+
+;; Email
+
+(load "email.el")
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.

@@ -1,7 +1,6 @@
 #! /bin/sh
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-PLATFORM="$(uname)"
 
 create_symlink() {
   # $1 = from, $2 = to
@@ -12,14 +11,6 @@ create_symlink() {
   fi
 }
 
-install_arch() {
-  sudo pacman -S $1
-}
-
-install_osx() {
-  brew install $1
-}
-
 install() {
   # Check if already installed
   if [ ! -x $1 ]
@@ -27,16 +18,7 @@ install() {
     echo "Found existing $1"
     return 1
   fi
-
-  if [ $PLATFORM = "Linux" ]
-  then
-    install_arch $1
-  elif [ $PLATFORM = "Darwin" ]
-  then
-    install_osx $1
-  else
-    return 0
-  fi
+  sudo pacman -S $1
 }
 
 setup_emacs() {
@@ -55,5 +37,4 @@ setup_i3() {
 
 setup_emacs
 setup_neovim
-if [ $PLATFORM = "Linux" ];then setup_i3; fi
-
+setup_i3
