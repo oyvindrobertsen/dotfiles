@@ -10,6 +10,8 @@
              '("tromey" . "http://tromey.com/elpa/") t)
 (add-to-list 'package-archives
              '("melpa" . "http://melpa.org/packages/") t)
+(add-to-list 'package-archives
+	     '("melpa-stable" . "https://stable.melpa.org/packages/") t)
 
 ;; (setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
 ;;                          ("marmalade" . "http://marmalade-repo.org/packages/")
@@ -21,107 +23,52 @@
 ;; This also sets the load path.
 (package-initialize)
 
-;; Download the ELPA archive description if needed.
 ;; This informs Emacs about the latest versions of all packages, and
 ;; makes them available for download.
 (when (not package-archive-contents)
-  (package-refresh-contents))
+  (package-refresh-contents)
+  (package-install 'use-package))
 
-;; The packages you want installed. You can also install these
-;; manually with M-x package-install
-;; Add in your own as you wish:
-(defvar my-packages
-  '(;; makes handling lisp expressions much, much easier
-    ;; Cheatsheet: http://www.emacswiki.org/emacs/PareditCheatsheet
-    paredit
 
-    ;; key bindings and code colorization for Clojure
-    ;; https://github.com/clojure-emacs/clojure-mode
-    clojure-mode
+(require 'use-package)
 
-    ;; extra syntax highlighting for clojure
-    clojure-mode-extra-font-locking
+(setq use-package-always-ensure t)
 
-    ;; integration with a Clojure REPL
-    ;; https://github.com/clojure-emacs/cider
-    cider
+(use-package paredit)
+(use-package clojure-mode)
+(use-package clojure-mode-extra-font-locking)
+(use-package cider)
+(use-package ido-ubiquitous)
+(use-package smex)
+(use-package projectile)
+(use-package rainbow-delimiters)
+(use-package tagedit)
+(use-package magit)
+(use-package evil)
+(use-package evil-leader)
+(use-package evil-magit)
+(use-package evil-org)
+;;(use-package evil-mu4e)
+(use-package php-mode)
+(use-package scss-mode)
+(use-package markdown-mode)
+(use-package company)
+(use-package company-jedi)
+(use-package company-tern)
+(use-package js2-mode)
+(use-package web-mode)
+(use-package fireplace)
+(use-package org-bullets)
+(use-package flycheck)
+(use-package editorconfig)
+(use-package exec-path-from-shell)
+(use-package spaceline)
+(use-package diminish)
+;;(use-package mu4e-alert)
+(use-package gruvbox-theme)
+(use-package ag)
 
-    ;; allow ido usage in as many contexts as possible. see
-    ;; customizations/navigation.el line 23 for a description
-    ;; of ido
-    ido-ubiquitous
-
-    ;; Enhances M-x to allow easier execution of commands. Provides
-    ;; a filterable list of possible commands in the minibuffer
-    ;; http://www.emacswiki.org/emacs/Smex
-    smex
-
-    ;; project navigation
-    projectile
-
-    ;; colorful parenthesis matching
-    rainbow-delimiters
-
-    ;; edit html tags like sexps
-    tagedit
-
-    ;; git integration
-    magit
-
-    ;; What am I, a savage?
-    evil
-    evil-leader
-    evil-magit
-
-    ;; PHP -.-
-    php-mode
-
-    ;; SCSS
-    scss-mode
-
-    ;; Markdown
-    markdown-mode
-    
-    ;; Autocomplete
-    company
-    company-jedi
-    company-tern
-
-    ;; JS
-    js2-mode
-
-    ;; Misc
-    web-mode
-    fireplace
-    evil-org
-    evil-mu4e
-    evil-leader
-    org-bullets
-    flycheck
-    editorconfig
-    exec-path-from-shell
-    spaceline
-    diminish
-    mu4e-alert
-    
-    gruvbox-theme
-))
-
-;; On OS X, an Emacs instance started from the graphical user
-;; interface will have a different environment than a shell in a
-;; terminal window, because OS X does not run a shell during the
-;; login. Obviously this will lead to unexpected results when
-;; calling external utilities like make from Emacs.
-;; This library works around this problem by copying important
-;; environment variables from the user's shell.
-;; https://github.com/purcell/exec-path-from-shell
-(if (eq system-type 'darwin)
-    (add-to-list 'my-packages 'exec-path-from-shell))
-
-(dolist (p my-packages)
-  (when (not (package-installed-p p))
-    (package-install p)))
-
+(add-to-list 'exec-path "/usr/local/bin")
 
 ;; Place downloaded elisp files in ~/.emacs.d/vendor. You'll then be able
 ;; to load them.
@@ -174,7 +121,9 @@
 
 ;; Email
 
-(load "email.el")
+;;(load "email.el")
+
+(use-package ensime :pin melpa-stable)
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -193,6 +142,9 @@
  '(ns-alternate-modifier (quote none))
  '(ns-function-modifier (quote meta))
  '(ns-right-alternate-modifier (quote none))
+ '(package-selected-packages
+   (quote
+    (ag web-mode tagedit spaceline smex scss-mode rainbow-delimiters projectile php-mode paredit org-bullets mu4e-alert markdown-mode js2-mode ido-ubiquitous gruvbox-theme flycheck fireplace exec-path-from-shell evil-org evil-mu4e evil-magit ensime editorconfig diminish company-tern company-jedi clojure-mode-extra-font-locking cider)))
  '(vc-annotate-background nil)
  '(vc-annotate-color-map
    (quote

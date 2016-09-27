@@ -14,6 +14,9 @@
 ;; Auto-reload changed files in doc-view
 (add-hook 'doc-view-mode-hook 'auto-revert-mode)
 
+;; Default to using ssh for tramp
+(setq tramp-default-method "ssh")
+
 ;; Load scss-mode
 (autoload 'scss-mode "scss-mode")
 (add-to-list 'auto-mode-alist '("\\.scss\\'" . scss-mode))
