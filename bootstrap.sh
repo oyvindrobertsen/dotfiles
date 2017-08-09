@@ -23,7 +23,7 @@ install() {
 
 setup_emacs() {
   install emacs
-  create_symlink .emacs.d/ ~/
+  create_symlink .spacemacs ~/
 }
 
 setup_neovim() {

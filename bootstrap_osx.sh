@@ -34,7 +34,7 @@ setup_brew() {
 
 setup_emacs() {
   brew cask install emacs
-  create_symlink .emacs.d/ ~/
+  create_symlink .spacemacs ~/
 }
 
 setup_neovim() {
