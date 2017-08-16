@@ -58,7 +58,6 @@ values."
      version-control
      (mu4e :variables
              mu4e-installation-path "/usr/local/share/emacs/site-lisp")
-     music
      )
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
@@ -142,11 +141,11 @@ values."
    dotspacemacs-colorize-cursor-according-to-state t
    ;; Default font, or prioritized list of fonts. `powerline-scale' allows to
    ;; quickly tweak the mode-line size to make separators look not too crappy.
-   dotspacemacs-default-font '("Source Code Pro"
-                               :size 13
+   dotspacemacs-default-font '("SauceCodePro Nerd Font"
+                               :size 23
                                :weight normal
                                :width normal
-                               :powerline-scale 1.1)
+                               :powerline-scale 1.0)
    ;; The leader key
    dotspacemacs-leader-key "SPC"
    ;; The key used for Emacs commands (M-x) (after pressing on the leader key).
@@ -354,9 +353,6 @@ you should place your code here."
         x-select-enable-clipboard t)
   ;; Consistent colors
   (setq ns-use-srgb-colorspace nil)
-  ;; Music
-  (setq emms-player-mpd-server-port "6600")
-  (emms-player-mpd-connect)
   ;; Disable flycheck tooltips
   (setq syntax-checking-enable-tooltips nil)
   )
