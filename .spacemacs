@@ -31,6 +31,9 @@ values."
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
    '(
+     csv
+     nginx
+     typescript
      python
      ;; ----------------------------------------------------------------
      ;; Example of useful layers you may want to use right away.
@@ -57,13 +60,15 @@ values."
      syntax-checking
      version-control
      (mu4e :variables
-             mu4e-installation-path "/usr/local/share/emacs/site-lisp")
+           mu4e-installation-path "/usr/share/emacs/site-lisp/mu4e")
+     sql
+     erc
      )
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages, then consider creating a layer. You can also put the
    ;; configuration in `dotspacemacs/user-config'.
-   dotspacemacs-additional-packages '()
+   dotspacemacs-additional-packages '(editorconfig lastpass)
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
    ;; A list of packages that will not be installed and loaded.
@@ -145,7 +150,7 @@ values."
                                :size 23
                                :weight normal
                                :width normal
-                               :powerline-scale 1.0)
+                               :powerline-scale 1.5)
    ;; The leader key
    dotspacemacs-leader-key "SPC"
    ;; The key used for Emacs commands (M-x) (after pressing on the leader key).
@@ -304,6 +309,58 @@ before packages are loaded. If you are unsure, you should try in setting them in
   (add-to-list 'exec-path "~/.nvm/versions/node/v6.4.0/bin")
   )
 
+(defvar my-mu4e-account-alist
+  '(("gmail"
+     (mu4e-sent-folder "/gmail/sent")
+     (user-mail-address "oyvindrobertsen@gmail.com")
+     (smtpmail-smtp-user "oyvindrobertsen")
+     (smtpmail-local-domain "gmail.com")
+     (smtpmail-default-smtp-server "smtp.gmail.com")
+     (smtpmail-smtp-server "smtp.gmail.com")
+     (smtpmail-smtp-service 587))
+    ("itera"
+     (mu4e-sent-folder "/itera/sent")
+     (user-mail-address "oyvind.robertsen@itera.no")
+     (smtpmail-smtp-user "oyvind.robertsen")
+     (smtpmail-local-domain "itera.no")
+     (smtpmail-default-smtp-server "smtp.office365.com")
+     (smtpmail-smtp-server "smtp.office365.com")
+     (smtpmail-stream-type starttls)
+     (smtpmail-smtp-service 587))
+    )
+  )
+
+(defun my-mu4e-set-account ()
+  "Set the account for composing a message.
+   This function is taken from: 
+     https://www.djcbsoftware.nl/code/mu/mu4e/Multiple-accounts.html"
+  (let* ((account
+          (if mu4e-compose-parent-message
+              (let ((maildir (mu4e-message-field mu4e-compose-parent-message :maildir)))
+                (string-match "/\\(.*?\\)/" maildir)
+                (match-string 1 maildir))
+            (completing-read (format "Compose with account: (%s) "
+                                     (mapconcat #'(lambda (var) (car var))
+                                                my-mu4e-account-alist "/"))
+                             (mapcar #'(lambda (var) (car var)) my-mu4e-account-alist)
+                             nil t nil nil (caar my-mu4e-account-alist))))
+         (account-vars (cdr (assoc account my-mu4e-account-alist))))
+    (if account-vars
+        (mapc #'(lambda (var)
+                  (set (car var) (cadr var)))
+              account-vars)
+      (error "No email account found"))))
+
+(defun my/use-eslint-from-node-modules ()
+  (let* ((root (locate-dominating-file
+                (or (buffer-file-name) default-directory)
+                "node_modules"))
+         (eslint (and root
+                      (expand-file-name "node_modules/eslint/bin/eslint.js"
+                                        root))))
+    (when (and eslint (file-executable-p eslint))
+      (setq-local flycheck-javascript-eslint-executable eslint))))
+
 (defun dotspacemacs/user-config ()
   "Configuration function for user code.
 This function is called at the very end of Spacemacs initialization after
@@ -312,9 +369,9 @@ This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loaded,
 you should place your code here."
   ;; mu4e
-  (setq mu4e-maildir "~/mail"
+  (setq mu4e-maildir "~/.mail"
         mu4e-get-mail-command "mbsync -a"
-        mu4e-update-interval 300
+        mu4e-update-interval 500
         mu4e-attachment-dir "~/Downloads"
         mu4e-hide-index-messages t
         mu4e-view-show-images t
@@ -322,11 +379,17 @@ you should place your code here."
         mu4e-html2text-command 'mu4e-shr2text
         mu4e-enable-notifications t
         mu4e-enable-mode-line t
-        mu4e-mu-binary "/usr/local/bin/mu")
+        mu4e-mu-binary "/usr/bin/mu")
+  (setq mu4e-sent-folder "/sent"
+        mu4e-drafts-folder "/drafts"
+        user-mail-address "oyvindrobertsen@gmail.com"
+        smtpmail-smtp-server "smtp.gmail.com"
+        smtpmail-smtp-service 587)
+  (add-hook 'mu4e-compose-pre-hook 'my-mu4e-set-account)
   (when (fboundp 'imagemagick-filter-types)
     (imagemagick-register-types))
   (with-eval-after-load 'mu4e-alert
-    (mu4e-alert-set-default-style 'notifier))
+    (mu4e-alert-set-default-style 'notifications))
   ;; Web stuff
   (setq-default
    ;; js2-mode
@@ -342,6 +405,7 @@ you should place your code here."
     (add-to-list 'web-mode-indentation-params '("lineup-args" . nil))
     (add-to-list 'web-mode-indentation-params '("lineup-concats" . nil))
     (add-to-list 'web-mode-indentation-params '("lineup-calls" . nil)))
+  (add-hook 'flycheck-mode-hook #'my/use-eslint-from-node-modules)
   ;; Scala
   (setq ensime-startup-snapshot-notification nil
         ensime-startup-notification nil)
@@ -354,7 +418,11 @@ you should place your code here."
   ;; Consistent colors
   (setq ns-use-srgb-colorspace nil)
   ;; Disable flycheck tooltips
-  (setq syntax-checking-enable-tooltips nil)
+  ;;(setq syntax-checking-enable-tooltips nil)
+  (editorconfig-mode 1)
+  (with-eval-after-load 'sql-mode
+    (sql-set-product-feature 'mysql :prompt-regexp "^\\(MariaDB\\|MySQL\\) \\[[_a-zA-Z]*\\]> "))
+  (require 'helm-bookmark)
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
@@ -367,8 +435,9 @@ you should place your code here."
  '(evil-want-Y-yank-to-eol nil)
  '(package-selected-packages
    (quote
-    (pdf-tools tablist org-category-capture yapfify pyvenv pytest pyenv-mode py-isort pip-requirements live-py-mode hy-mode helm-pydoc cython-mode company-anaconda anaconda-mode pythonic org-ref key-chord ivy helm-bibtex parsebib biblio biblio-core emms company-auctex auctex-latexmk auctex disaster company-c-headers cmake-mode clang-format emoji-cheat-sheet-plus company-emoji winum unfill fuzzy web-mode tagedit slim-mode scss-mode sass-mode pug-mode less-css-mode helm-css-scss haml-mode emmet-mode company-web web-completion-data web-beautify livid-mode skewer-mode simple-httpd json-mode json-snatcher json-reformat js2-refactor multiple-cursors js2-mode js-doc company-tern dash-functional tern coffee-mode mu4e-maildirs-extension mu4e-alert ht noflet ensime sbt-mode scala-mode xterm-color smeargle shell-pop orgit org-projectile org-present org org-pomodoro alert log4e gntp org-download mwim multi-term mmm-mode markdown-toc markdown-mode magit-gitflow htmlize helm-gitignore helm-company helm-c-yasnippet gnuplot gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe+ git-gutter-fringe fringe-helper git-gutter+ git-gutter gh-md flyspell-correct-helm flyspell-correct flycheck-pos-tip pos-tip flycheck evil-magit magit magit-popup git-commit with-editor eshell-z eshell-prompt-extras esh-help diff-hl company-statistics company auto-yasnippet yasnippet auto-dictionary ac-ispell auto-complete ws-butler window-numbering which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint info+ indent-guide ido-vertical-mode hydra hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make projectile pkg-info epl helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu highlight elisp-slime-nav dumb-jump f s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed dash aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async quelpa package-build spacemacs-theme)))
- '(paradox-github-token t))
+    (csv-mode erc-yt erc-view-log erc-social-graph erc-image erc-hl-nicks nginx-mode add-node-modules-path lastpass sql-indent editorconfig tide typescript-mode pdf-tools tablist org-category-capture yapfify pyvenv pytest pyenv-mode py-isort pip-requirements live-py-mode hy-mode helm-pydoc cython-mode company-anaconda anaconda-mode pythonic org-ref key-chord ivy helm-bibtex parsebib biblio biblio-core emms company-auctex auctex-latexmk auctex disaster company-c-headers cmake-mode clang-format emoji-cheat-sheet-plus company-emoji winum unfill fuzzy web-mode tagedit slim-mode scss-mode sass-mode pug-mode less-css-mode helm-css-scss haml-mode emmet-mode company-web web-completion-data web-beautify livid-mode skewer-mode simple-httpd json-mode json-snatcher json-reformat js2-refactor multiple-cursors js2-mode js-doc company-tern dash-functional tern coffee-mode mu4e-maildirs-extension mu4e-alert ht noflet ensime sbt-mode scala-mode xterm-color smeargle shell-pop orgit org-projectile org-present org org-pomodoro alert log4e gntp org-download mwim multi-term mmm-mode markdown-toc markdown-mode magit-gitflow htmlize helm-gitignore helm-company helm-c-yasnippet gnuplot gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe+ git-gutter-fringe fringe-helper git-gutter+ git-gutter gh-md flyspell-correct-helm flyspell-correct flycheck-pos-tip pos-tip flycheck evil-magit magit magit-popup git-commit with-editor eshell-z eshell-prompt-extras esh-help diff-hl company-statistics company auto-yasnippet yasnippet auto-dictionary ac-ispell auto-complete ws-butler window-numbering which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint info+ indent-guide ido-vertical-mode hydra hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make projectile pkg-info epl helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu highlight elisp-slime-nav dumb-jump f s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed dash aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async quelpa package-build spacemacs-theme)))
+ '(paradox-github-token t)
+ '(send-mail-function (quote smtpmail-send-it)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
