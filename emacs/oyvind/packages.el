@@ -1,0 +1,1 @@
+(def-package! evil-magit)
