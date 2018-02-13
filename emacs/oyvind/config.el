@@ -15,3 +15,7 @@
 
 (add-hook 'json-mode-hook
           (lambda () (add-hook 'post-command-hook #'show-json-path-on-position-change-hook nil 'local)))
+
+(def-package! evil-magit :after magit
+  :init
+  (setq evil-magit-state 'normal))
