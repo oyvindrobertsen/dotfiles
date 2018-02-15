@@ -1,4 +1,11 @@
-(setq doom-font (font-spec :family "Source Code Pro" :size 11))
+;;; private/oyvind/config.el --- Test
+
+;;; Code:
+
+(when (window-system)
+  (if (> (x-display-pixel-width) 1080)
+      (setq doom-font (font-spec :family "Source Code Pro" :size 22))
+    (setq doom-font (font-spec :family "Source Code Pro" :size 11))))
 
 ;; Eager autocomplete
 (require 'company)
