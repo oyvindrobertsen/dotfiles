@@ -3,7 +3,7 @@
 ;;; Code:
 
 (when (window-system)
-  (if (> (x-display-pixel-width) 1080)
+  (if (> (nth 1 (assq 'geometry (car (display-monitor-attributes-list)))) 1920)
       (setq doom-font (font-spec :family "Source Code Pro" :size 22))
     (setq doom-font (font-spec :family "Source Code Pro" :size 11))))
 
